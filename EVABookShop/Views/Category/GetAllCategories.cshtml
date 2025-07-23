@@ -1,0 +1,25 @@
+@model IEnumerable<EVABookShop.Models.CategoryViewModel>
+@{
+    ViewData["Title"] = "Category List";
+}
+<h2>Category List</h2>
+<a asp-action="CreateCategory" class="btn btn-primary mb-2">Create New Category</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Category Name</th>
+            <th>Category Order</th>
+            <th>Is Active</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.CatName</td>
+                <td>@item.CatOrder</td>
+                <td>@(item.IsActive ? "Yes" : "No")</td>
+            </tr>
+        }
+    </tbody>
+</table> 

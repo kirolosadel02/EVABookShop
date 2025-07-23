@@ -1,4 +1,5 @@
 using DataAccess;
+using EVABookShop.Services.Categories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,8 @@ builder.Services.AddControllersWithViews();
 // Register BookShopContext with SQL Server
 builder.Services.AddDbContext<BookShopContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
