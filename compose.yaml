@@ -1,0 +1,22 @@
+﻿services:
+  evabookshop:
+    image: evabookshop
+    build:
+      context: .
+      dockerfile: EVABookShop/Dockerfile
+    ports:
+      - "8080:8080"
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=P@ssw0rd
+      - MSSQL_PID=EXPRESS
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "sqlcmd -S localhost -U sa -P P@ssw0rd -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+

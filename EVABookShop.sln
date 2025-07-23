@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EVABookShop", "EVABookShop\EVABookShop.csproj", "{E54B49C5-BF7E-4128-8C4F-07A83BF8DA17}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FF4C4791-50D6-4DD1-AAB5-17420EF4D4C1}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{493AD8B5-F53B-4936-B9A0-068F94866BE8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{F8FDF416-88E9-4032-8EBA-08B3B2229F18}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E54B49C5-BF7E-4128-8C4F-07A83BF8DA17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E54B49C5-BF7E-4128-8C4F-07A83BF8DA17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E54B49C5-BF7E-4128-8C4F-07A83BF8DA17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E54B49C5-BF7E-4128-8C4F-07A83BF8DA17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{493AD8B5-F53B-4936-B9A0-068F94866BE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{493AD8B5-F53B-4936-B9A0-068F94866BE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{493AD8B5-F53B-4936-B9A0-068F94866BE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{493AD8B5-F53B-4936-B9A0-068F94866BE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8FDF416-88E9-4032-8EBA-08B3B2229F18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8FDF416-88E9-4032-8EBA-08B3B2229F18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8FDF416-88E9-4032-8EBA-08B3B2229F18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8FDF416-88E9-4032-8EBA-08B3B2229F18}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
