@@ -8,17 +8,18 @@ namespace EVABookShop.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
+
         public CategoryController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
         }
 
         [HttpGet("")]
-        public IActionResult GetAllCategories() => 
+        public IActionResult GetAllCategories() =>
             View(_categoryService.GetAllCategoryViewModels());
 
         [HttpGet("create")]
-        public IActionResult CreateCategory() => 
+        public IActionResult CreateCategory() =>
             View();
 
         [HttpPost("create")]
@@ -29,5 +30,39 @@ namespace EVABookShop.Controllers
                 return RedirectToAction("GetAllCategories");
             return View(model);
         }
+
+        [HttpGet("edit/{id}")]
+        public async Task<IActionResult> EditCategory(int id)
+        {
+            var model = await _categoryService.GetCategoryById(id);
+            if (model == null) return NotFound();
+            return View(model);
+        }
+
+        [HttpPost("edit/{id}")]
+        public async Task<IActionResult> EditCategory(int id, CategoryViewModel model)
+        {
+            var result = await _categoryService.UpdateCategory(id, model, ModelState);
+            if (result) return RedirectToAction("GetAllCategories");
+            return View(model);
+        }
+
+
+        [HttpGet("details/{id}")]
+        public async Task<IActionResult> DetailsCategory(int id)
+        {
+            var model = await _categoryService.GetCategoryById(id);
+            if (model == null) return NotFound();
+            return View(model);
+        }
+
+
+        [HttpGet("delete/{id}")]
+        public async Task<IActionResult> DeleteCategory(int id)
+        {
+            var result = await _categoryService.DeleteCategory(id);
+            return RedirectToAction("GetAllCategories");
+        }
+
     }
-} 
+}

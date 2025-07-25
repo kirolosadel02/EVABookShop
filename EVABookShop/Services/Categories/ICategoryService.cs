@@ -10,5 +10,8 @@ namespace EVABookShop.Services.Categories
     {
         List<CategoryViewModel> GetAllCategoryViewModels();
         Task<bool> CreateCategory(CategoryViewModel model, ModelStateDictionary modelState);
+        Task<CategoryViewModel> GetCategoryById(int id);
+        Task<bool> UpdateCategory(int id, CategoryViewModel model, ModelStateDictionary modelState);
+        Task<bool> DeleteCategory(int id);
     }
 }

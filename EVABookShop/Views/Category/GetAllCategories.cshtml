@@ -1,25 +1,63 @@
-@model IEnumerable<EVABookShop.Models.CategoryViewModel>
+@model List<EVABookShop.Models.CategoryViewModel>
 @{
-    ViewData["Title"] = "Category List";
+    ViewData["Title"] = "Categories";
 }
-<h2>Category List</h2>
-<a asp-action="CreateCategory" class="btn btn-primary mb-2">Create New Category</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Category Name</th>
-            <th>Category Order</th>
-            <th>Is Active</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+
+<h2>Categories</h2>
+
+<div class="mb-3">
+    <a asp-action="CreateCategory" class="btn btn-primary">Create New Category</a>
+</div>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@item.CatName</td>
-                <td>@item.CatOrder</td>
-                <td>@(item.IsActive ? "Yes" : "No")</td>
+                <th>Name</th>
+                <th>Order</th>
+                <th>Status</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table> 
+        </thead>
+        <tbody>
+            @foreach (var category in Model.OrderBy(c => c.CatOrder))
+            {
+                <tr>
+                    <td>@category.CatName</td>
+                    <td>@category.CatOrder</td>
+                    <td>
+                        @if (category.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">InActive</span>
+                        }
+                    </td>
+                    <td>
+                        @if (category.IsActive)
+                        {
+                            <a asp-action="DetailsCategory" asp-route-id="@category.Id" class="btn btn-info">Details</a>
+                            <a asp-action="EditCategory" asp-route-id="@category.Id" class="btn btn-warning btn-sm">Update</a>
+                            <a asp-action="DeleteCategory" asp-route-id="@category.Id" 
+                               class="btn btn-danger btn-sm" 
+                               onclick="return confirm('Are you sure you want to deactivate this category?')">Delete</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No actions available for inactive categories</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        <p>No categories found. <a asp-action="CreateCategory">Create one now</a>.</p>
+    </div>
+}
