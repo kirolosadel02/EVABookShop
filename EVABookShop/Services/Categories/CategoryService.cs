@@ -118,5 +118,34 @@ namespace EVABookShop.Services.Categories
             return true;
         }
 
+        public async Task<bool> CheckCategoryNameExistsAsync(string categoryName, int? excludeId = null)
+        {
+            if (string.IsNullOrWhiteSpace(categoryName))
+                return false;
+
+            var query = _context.Categories
+                .Where(c => c.CatName.ToLower().Trim() == categoryName.ToLower().Trim() && !c.MarkedAsDeleted);
+
+            if (excludeId.HasValue)
+            {
+                query = query.Where(c => c.Id != excludeId.Value);
+            }
+
+            return await query.AnyAsync();
+        }
+
+        public async Task<bool> CheckCategoryOrderExistsAsync(int categoryOrder, int? excludeId = null)
+        {
+            var query = _context.Categories
+                .Where(c => c.CatOrder == categoryOrder && !c.MarkedAsDeleted);
+
+            if (excludeId.HasValue)
+            {
+                query = query.Where(c => c.Id != excludeId.Value);
+            }
+
+            return await query.AnyAsync();
+        }
+
     }
 }

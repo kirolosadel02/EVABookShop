@@ -3,31 +3,237 @@
     ViewData["Title"] = "Edit Category";
 }
 
-<h2>Edit Category</h2>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Edit Category</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditCategory" asp-route-id="@Model.Id" method="post" id="editCategoryForm" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
 
-<form asp-action="EditCategory" asp-route-id="@Model.Id" method="post">
-    <input type="hidden" asp-for="Id" />
+                        <!-- Display validation summary for model-level errors -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" id="validationSummary"></div>
 
-    <div class="form-group mb-3">
-        <label asp-for="CatName" class="form-label"></label>
-        <input asp-for="CatName" class="form-control" />
-        <span asp-validation-for="CatName" class="text-danger"></span>
+                        <!-- Success/Error messages -->
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                @TempData["SuccessMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                @TempData["ErrorMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <div class="form-group mb-3">
+                            <label asp-for="CatName" class="form-label">Category Name</label>
+                            <input asp-for="CatName" class="form-control" placeholder="Enter category name" maxlength="100" data-original-value="@Model.CatName" />
+                            <span asp-validation-for="CatName" class="text-danger"></span>
+                            <div class="form-text">Category name must be 2-100 characters long and contain only letters, numbers, spaces, hyphens, and underscores.</div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="CatOrder" class="form-label">Category Order</label>
+                            <input asp-for="CatOrder" class="form-control" type="number" min="1" max="9999" placeholder="Enter display order" data-original-value="@Model.CatOrder" />
+                            <span asp-validation-for="CatOrder" class="text-danger"></span>
+                            <div class="form-text">Order number must be between 1 and 9999.</div>
+                        </div>
+
+                        <div class="form-group d-flex gap-2">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span class="spinner-border spinner-border-sm d-none" id="loadingSpinner"></span>
+                                Update Category
+                            </button>
+                            <a asp-action="GetAllCategories" class="btn btn-secondary">Back to List</a>
+                            <button type="button" class="btn btn-warning" id="resetBtn">Reset Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="CatOrder" class="form-label"></label>
-        <input asp-for="CatOrder" class="form-control" type="number" />
-        <span asp-validation-for="CatOrder" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Update</button>
-        <a asp-action="GetAllCategories" class="btn btn-secondary">Back to List</a>
-    </div>
-</form>
+</div>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        $(document).ready(function() {
+            var originalName = $("#CatName").data("original-value");
+            var originalOrder = $("#CatOrder").data("original-value");
+            var hasChanges = false;
+
+            // Custom validation rules
+            $.validator.addMethod("categoryname", function(value, element) {
+                return this.optional(element) || /^[a-zA-Z0-9\s\-_]+$/.test(value);
+            }, "Category name can only contain letters, numbers, spaces, hyphens, and underscores.");
+
+            // Configure validation
+            $("#editCategoryForm").validate({
+                rules: {
+                    CatName: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 100,
+                        categoryname: true
+                    },
+                    CatOrder: {
+                        required: true,
+                        min: 1,
+                        max: 9999,
+                        digits: true
+                    }
+                },
+                messages: {
+                    CatName: {
+                        required: "Category name is required.",
+                        minlength: "Category name must be at least 2 characters long.",
+                        maxlength: "Category name cannot exceed 100 characters.",
+                        categoryname: "Category name can only contain letters, numbers, spaces, hyphens, and underscores."
+                    },
+                    CatOrder: {
+                        required: "Category order is required.",
+                        min: "Category order must be at least 1.",
+                        max: "Category order cannot exceed 9999.",
+                        digits: "Category order must be a whole number."
+                    }
+                },
+                errorClass: "text-danger",
+                validClass: "is-valid",
+                errorElement: "span",
+                highlight: function(element) {
+                    $(element).addClass("is-invalid").removeClass("is-valid");
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid").addClass("is-valid");
+                },
+                submitHandler: function(form) {
+                    // Check if there are any changes
+                    var currentName = $("#CatName").val().trim();
+                    var currentOrder = parseInt($("#CatOrder").val());
+
+                    if (currentName === originalName && currentOrder === originalOrder) {
+                        alert("No changes detected. Please make changes before updating.");
+                        return false;
+                    }
+
+                    // Show loading state
+                    $("#submitBtn").prop("disabled", true);
+                    $("#loadingSpinner").removeClass("d-none");
+
+                    // Check for duplicate category name via AJAX before submitting (only if name changed)
+                    if (currentName !== originalName) {
+                        $.ajax({
+                            url: '/categories/check-name-exists',
+                            type: 'POST',
+                            data: {
+                                categoryName: currentName,
+                                excludeId: @Model.Id
+                            },
+                            success: function(response) {
+                                if (response.exists) {
+                                    $("#CatName").addClass("is-invalid");
+                                    $("#CatName").next(".text-danger").text("Category name already exists.");
+
+                                    // Reset button state
+                                    $("#submitBtn").prop("disabled", false);
+                                    $("#loadingSpinner").addClass("d-none");
+                                } else {
+                                    // Submit the form
+                                    form.submit();
+                                }
+                            },
+                            error: function() {
+                                // If AJAX fails, submit anyway (server will handle validation)
+                                form.submit();
+                            }
+                        });
+                    } else {
+                        // Name hasn't changed, submit directly
+                        form.submit();
+                    }
+
+                    return false; // Prevent default form submission
+                }
+            });
+
+            // Track changes
+            function checkForChanges() {
+                var currentName = $("#CatName").val().trim();
+                var currentOrder = parseInt($("#CatOrder").val()) || 0;
+
+                hasChanges = (currentName !== originalName) || (currentOrder !== originalOrder);
+                $("#resetBtn").prop("disabled", !hasChanges);
+            }
+
+            // Real-time validation feedback and change tracking
+            $("#CatName").on("input", function() {
+                var value = $(this).val().trim();
+                if (value.length > 0) {
+                    $(this).valid(); // Trigger validation
+                }
+                checkForChanges();
+            });
+
+            $("#CatOrder").on("input", function() {
+                var value = $(this).val();
+                if (value.length > 0) {
+                    $(this).valid(); // Trigger validation
+                }
+                checkForChanges();
+            });
+
+            // Trim whitespace on blur
+            $("#CatName").on("blur", function() {
+                $(this).val($(this).val().trim());
+                checkForChanges();
+            });
+
+            // Reset button functionality
+            $("#resetBtn").on("click", function() {
+                if (confirm("Are you sure you want to reset all changes?")) {
+                    $("#CatName").val(originalName);
+                    $("#CatOrder").val(originalOrder);
+
+                    // Clear validation states
+                    $("#editCategoryForm").find(".is-invalid, .is-valid").removeClass("is-invalid is-valid");
+                    $("#editCategoryForm").find(".text-danger").text("");
+
+                    checkForChanges();
+                }
+            });
+
+            // Warning before leaving page with unsaved changes
+            window.addEventListener("beforeunload", function(e) {
+                if (hasChanges) {
+                    var confirmationMessage = "You have unsaved changes. Are you sure you want to leave?";
+                    e.returnValue = confirmationMessage;
+                    return confirmationMessage;
+                }
+            });
+
+            // Remove warning when form is submitted
+            $("#editCategoryForm").on("submit", function() {
+                window.removeEventListener("beforeunload", arguments.callee);
+            });
+
+            // Initial state
+            checkForChanges();
+        });
+    </script>
 }
+
+
+

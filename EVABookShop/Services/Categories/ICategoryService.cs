@@ -13,5 +13,7 @@ namespace EVABookShop.Services.Categories
         Task<CategoryViewModel> GetCategoryById(int id);
         Task<bool> UpdateCategory(int id, CategoryViewModel model, ModelStateDictionary modelState);
         Task<bool> DeleteCategory(int id);
+        Task<bool> CheckCategoryNameExistsAsync(string categoryName, int? excludeId = null);
+        Task<bool> CheckCategoryOrderExistsAsync(int categoryOrder, int? excludeId = null);
     }
 }
