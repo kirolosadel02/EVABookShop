@@ -1,30 +1,29 @@
-using DataAccess;
 using EVABookShop.Models;
+using EVABookShop.UnitOfWork;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.EntityFrameworkCore;
 using Models;
 
 namespace EVABookShop.Services.Categories
 {
     public class CategoryService : ICategoryService
     {
-        private readonly BookShopContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoryService(BookShopContext context)
+        public CategoryService(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public List<CategoryViewModel> GetAllCategoryViewModels()
         {
-            return _context.Categories
-                .Select(c => new CategoryViewModel
-                {
-                    Id = c.Id,
-                    CatName = c.CatName,
-                    CatOrder = c.CatOrder,
-                    IsActive = !c.MarkedAsDeleted
-                }).ToList();
+            var categories = _unitOfWork.Repository<Category>().GetAll().Result;
+            return categories.Select(c => new CategoryViewModel
+            {
+                Id = c.Id,
+                CatName = c.CatName,
+                CatOrder = c.CatOrder,
+                IsActive = !c.MarkedAsDeleted
+            }).ToList();
         }
 
         public async Task<bool> CreateCategory(CategoryViewModel model, ModelStateDictionary modelState)
@@ -32,17 +31,16 @@ namespace EVABookShop.Services.Categories
             if (!modelState.IsValid)
                 return false;
 
-            // Check if category name already exists (including soft-deleted ones)
-            var existingCategory = await _context.Categories
-                .FirstOrDefaultAsync(c => c.CatName == model.CatName);
+            var repo = _unitOfWork.Repository<Category>();
+            var existingCategory = (await repo.GetData(c => c.CatName == model.CatName)).FirstOrDefault();
 
             if (existingCategory != null)
             {
                 if (existingCategory.MarkedAsDeleted)
                 {
-                    // Restore the soft-deleted category as active
                     existingCategory.CatOrder = model.CatOrder;
-                    existingCategory.MarkedAsDeleted = false; // Always create as active
+                    existingCategory.MarkedAsDeleted = false;
+                    await repo.Update(existingCategory);
                 }
                 else
                 {
@@ -52,23 +50,22 @@ namespace EVABookShop.Services.Categories
             }
             else
             {
-                // Create new category - always active by default
                 var category = new Category
                 {
                     CatName = model.CatName,
                     CatOrder = model.CatOrder,
-                    MarkedAsDeleted = false // Always create as active
+                    MarkedAsDeleted = false
                 };
-                _context.Categories.Add(category);
+                repo.Add(category);
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChanges();
             return true;
         }
 
         public async Task<CategoryViewModel> GetCategoryById(int id)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+            var category = await Task.Run(() => _unitOfWork.Repository<Category>().GetById(id));
             if (category == null) return null;
 
             return new CategoryViewModel
@@ -85,15 +82,14 @@ namespace EVABookShop.Services.Categories
             if (!modelState.IsValid)
                 return false;
 
-            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+            var repo = _unitOfWork.Repository<Category>();
+            var category = await Task.Run(() => repo.GetById(id));
             if (category == null)
                 return false;
 
             if (category.CatName != model.CatName)
             {
-                var nameExists = await _context.Categories
-                    .AnyAsync(c => c.CatName == model.CatName && c.Id != id && !c.MarkedAsDeleted);
-
+                var nameExists = (await repo.GetData(c => c.CatName == model.CatName && c.Id != id && !c.MarkedAsDeleted)).Any();
                 if (nameExists)
                 {
                     modelState.AddModelError("CatName", "Category name already exists.");
@@ -103,18 +99,20 @@ namespace EVABookShop.Services.Categories
 
             category.CatName = model.CatName;
             category.CatOrder = model.CatOrder;
-            await _context.SaveChangesAsync();
+            await repo.Update(category);
+            await _unitOfWork.SaveChanges();
             return true;
         }
 
-
         public async Task<bool> DeleteCategory(int id)
         {
-            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+            var repo = _unitOfWork.Repository<Category>();
+            var category = await Task.Run(() => repo.GetById(id));
             if (category == null) return false;
 
             category.MarkedAsDeleted = true;
-            await _context.SaveChangesAsync();
+            await repo.Update(category);
+            await _unitOfWork.SaveChanges();
             return true;
         }
 
@@ -123,29 +121,22 @@ namespace EVABookShop.Services.Categories
             if (string.IsNullOrWhiteSpace(categoryName))
                 return false;
 
-            var query = _context.Categories
-                .Where(c => c.CatName.ToLower().Trim() == categoryName.ToLower().Trim() && !c.MarkedAsDeleted);
-
+            var repo = _unitOfWork.Repository<Category>();
+            var query = await repo.GetData(c => c.CatName.ToLower().Trim() == categoryName.ToLower().Trim() && !c.MarkedAsDeleted);
             if (excludeId.HasValue)
-            {
                 query = query.Where(c => c.Id != excludeId.Value);
-            }
 
-            return await query.AnyAsync();
+            return query.Any();
         }
 
         public async Task<bool> CheckCategoryOrderExistsAsync(int categoryOrder, int? excludeId = null)
         {
-            var query = _context.Categories
-                .Where(c => c.CatOrder == categoryOrder && !c.MarkedAsDeleted);
-
+            var repo = _unitOfWork.Repository<Category>();
+            var query = await repo.GetData(c => c.CatOrder == categoryOrder && !c.MarkedAsDeleted);
             if (excludeId.HasValue)
-            {
                 query = query.Where(c => c.Id != excludeId.Value);
-            }
 
-            return await query.AnyAsync();
+            return query.Any();
         }
-
     }
 }

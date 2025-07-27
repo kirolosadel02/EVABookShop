@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EVABookShop", "EVABookShop\EVABookShop.csproj", "{E54B49C5-BF7E-4128-8C4F-07A83BF8DA17}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FF4C4791-50D6-4DD1-AAB5-17420EF4D4C1}"
@@ -10,6 +13,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{493AD8B5-F53B-4936-B9A0-068F94866BE8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{F8FDF416-88E9-4032-8EBA-08B3B2229F18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EVABookShop.Repositories", "EVABookShop.Repositories\EVABookShop.Repositories.csproj", "{2F739373-5265-43C5-AF37-561DB11ADD58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EVABookShop.UnitOfWork", "EVABookShop.UnitOfWork\EVABookShop.UnitOfWork.csproj", "{C091CD60-7ED9-49D7-91AA-0CF021702723}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,5 +36,19 @@ Global
 		{F8FDF416-88E9-4032-8EBA-08B3B2229F18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8FDF416-88E9-4032-8EBA-08B3B2229F18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8FDF416-88E9-4032-8EBA-08B3B2229F18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F739373-5265-43C5-AF37-561DB11ADD58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F739373-5265-43C5-AF37-561DB11ADD58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F739373-5265-43C5-AF37-561DB11ADD58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F739373-5265-43C5-AF37-561DB11ADD58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C091CD60-7ED9-49D7-91AA-0CF021702723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C091CD60-7ED9-49D7-91AA-0CF021702723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C091CD60-7ED9-49D7-91AA-0CF021702723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C091CD60-7ED9-49D7-91AA-0CF021702723}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ABE2DB23-0C4B-4910-BAC7-951C0EA7860E}
 	EndGlobalSection
 EndGlobal

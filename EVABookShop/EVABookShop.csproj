@@ -14,6 +14,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+      <ProjectReference Include="..\EVABookShop.Repositories\EVABookShop.Repositories.csproj" />
+      <ProjectReference Include="..\EVABookShop.UnitOfWork\EVABookShop.UnitOfWork.csproj" />
       <ProjectReference Include="..\Models\Models.csproj" />
     </ItemGroup>
 
@@ -22,6 +24,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Scrutor" Version="6.1.0" />
     </ItemGroup>
 
 </Project>

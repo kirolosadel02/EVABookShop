@@ -1,6 +1,7 @@
 using DataAccess;
 using EVABookShop.Services.Categories;
 using Microsoft.EntityFrameworkCore;
+using Scrutor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,16 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<BookShopContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.Scan(selector => selector
+    .FromAssemblies(
+        EVABookShop.Repositories.AssemblyReference.Assembly,
+        EVABookShop.UnitOfWork.AssemblyReference.Assembly,
+        EVABookShop.DataAccess.AssemblyReference.Assembly
+    // Add more as needed
+    )
+    .AddClasses() // You can filter here if needed
+    .AsImplementedInterfaces()
+    .WithScopedLifetime());
 
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
