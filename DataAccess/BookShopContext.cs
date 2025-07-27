@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Models;
 using DataAccess.Configurations;
+using EVABookShop.Configurations;
 namespace DataAccess
 {
     public class BookShopContext : DbContext
@@ -9,12 +10,10 @@ namespace DataAccess
             : base(options)
         {
         }
-
-        public DbSet<Category> Categories { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new CategoryConfiguration());
+            modelBuilder.ApplyConfiguration(new BookConfiguration());
             base.OnModelCreating(modelBuilder);
         }
     }

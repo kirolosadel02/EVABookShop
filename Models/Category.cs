@@ -1,4 +1,4 @@
-using System;
+using EVABookShop.Models;
 // using System.ComponentModel.DataAnnotations;
 // using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,5 +17,7 @@ namespace Models
         public DateTime CreatedDate { get; set; }
         // [Column("isDeleted")]
         public bool MarkedAsDeleted { get; set; }
+
+        public ICollection<Book> Books { get; set; }
     }
 } 
