@@ -1,7 +1,6 @@
-﻿using Models;
-//using System.ComponentModel.DataAnnotations;
+﻿//using System.ComponentModel.DataAnnotations;
 
-namespace EVABookShop.Models
+namespace Models
 {
     public class Book
     {

@@ -1,8 +1,8 @@
-﻿using EVABookShop.Models;
+﻿using Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EVABookShop.Configurations
+namespace DataAccess.Configurations
 {
     public class BookConfiguration : IEntityTypeConfiguration<Book>
     {

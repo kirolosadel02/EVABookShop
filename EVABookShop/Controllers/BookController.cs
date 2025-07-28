@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using EVABookShop.Models;
 using EVABookShop.Services.Books;
+using EVABookShop.Services.Categories;
 
 namespace EVABookShop.Controllers
 {
@@ -8,22 +9,26 @@ namespace EVABookShop.Controllers
     public class BookController : Controller
     {
         private readonly IBookService _bookService;
+        private readonly ICategoryService _categoryService;
 
-        public BookController(IBookService bookService)
+        public BookController(IBookService bookService, ICategoryService categoryService)
         {
             _bookService = bookService;
+            _categoryService = categoryService;
         }
 
         [HttpGet("")]
-        public IActionResult GetAllBooks()
+        public async Task<IActionResult> GetAllBooks()
         {
-            var books = _bookService.GetAllBooks();
+            var books = await _bookService.GetAllBooks();
             return View(books);
         }
 
         [HttpGet("create")]
         public IActionResult CreateBook()
         {
+            var categories = _categoryService.GetAllCategoryViewModels();
+            ViewBag.Categories = categories.Where(c => c.IsActive).OrderBy(c => c.CatOrder).ThenBy(c => c.CatName).ToList();
             return View();
         }
 
@@ -31,9 +36,17 @@ namespace EVABookShop.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateBook(BookViewModel model)
         {
+            var categories = _categoryService.GetAllCategoryViewModels();
+            ViewBag.Categories = categories.Where(c => c.IsActive).OrderBy(c => c.CatOrder).ThenBy(c => c.CatName).ToList();
+            
             var result = await _bookService.CreateBook(model, ModelState);
             if (result)
+            {
+                TempData["SuccessMessage"] = "Book created successfully.";
                 return RedirectToAction("GetAllBooks");
+            }
+            
+            TempData["ErrorMessage"] = "Failed to create book. Please check the errors and try again.";
             return View(model);
         }
 
@@ -42,6 +55,10 @@ namespace EVABookShop.Controllers
         {
             var model = await _bookService.GetBookById(id);
             if (model == null) return NotFound();
+            
+            var categories = _categoryService.GetAllCategoryViewModels();
+            ViewBag.Categories = categories.Where(c => c.IsActive).OrderBy(c => c.CatOrder).ThenBy(c => c.CatName).ToList();
+            
             return View(model);
         }
 
@@ -54,6 +71,9 @@ namespace EVABookShop.Controllers
                 TempData["ErrorMessage"] = "Invalid book ID.";
                 return RedirectToAction("GetAllBooks");
             }
+
+            var categories = _categoryService.GetAllCategoryViewModels();
+            ViewBag.Categories = categories.Where(c => c.IsActive).OrderBy(c => c.CatOrder).ThenBy(c => c.CatName).ToList();
 
             if (!ModelState.IsValid)
             {
@@ -85,6 +105,14 @@ namespace EVABookShop.Controllers
         public async Task<IActionResult> DeleteBook(int id)
         {
             var result = await _bookService.DeleteBook(id);
+            if (result)
+            {
+                TempData["SuccessMessage"] = "Book deleted successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to delete book.";
+            }
             return RedirectToAction("GetAllBooks");
         }
     }

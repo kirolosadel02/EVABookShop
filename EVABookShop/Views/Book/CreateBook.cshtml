@@ -1,0 +1,237 @@
+@model EVABookShop.Models.BookViewModel
+@{
+    ViewData["Title"] = "Create Book";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Create Book</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateBook" method="post" id="createBookForm" novalidate>
+                        @Html.AntiForgeryToken()
+
+                        <!-- Display validation summary for model-level errors -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" id="validationSummary"></div>
+
+                        <!-- Success/Error messages -->
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                @TempData["SuccessMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                @TempData["ErrorMessage"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Title" class="form-label">Book Title</label>
+                                    <input asp-for="Title" class="form-control" placeholder="Enter book title" maxlength="200" />
+                                    <span asp-validation-for="Title" class="text-danger"></span>
+                                    <div class="form-text">Book title must be 2-200 characters long.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Author" class="form-label">Author</label>
+                                    <input asp-for="Author" class="form-control" placeholder="Enter author name" maxlength="100" />
+                                    <span asp-validation-for="Author" class="text-danger"></span>
+                                    <div class="form-text">Author name must be 2-100 characters long.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="CategoryId" class="form-label">Category</label>
+                                    <select asp-for="CategoryId" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "Id", "CatName"))">
+                                        <option value="">-- Select Category --</option>
+                                    </select>
+                                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                    <div class="form-text">Please select a category for this book.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Price" class="form-label">Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input asp-for="Price" class="form-control" type="number" step="0.01" min="1" max="1000" placeholder="1.00" />
+                                    </div>
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                    <div class="form-text">Price must be between $1.00 and $1,000.00.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter book description" maxlength="1000"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <div class="form-text">Description is optional and cannot exceed 1000 characters.</div>
+                        </div>
+
+                        <div class="form-group d-flex gap-2">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span class="spinner-border spinner-border-sm d-none" id="loadingSpinner"></span>
+                                Create Book
+                            </button>
+                            <a asp-action="GetAllBooks" class="btn btn-secondary">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Custom validation rules
+            $.validator.addMethod("booktitle", function(value, element) {
+                return this.optional(element) || /^[a-zA-Z0-9\s\-_.,!?'"()]+$/.test(value);
+            }, "Book title can only contain letters, numbers, spaces, and common punctuation marks.");
+
+            $.validator.addMethod("authorname", function(value, element) {
+                return this.optional(element) || /^[a-zA-Z\s\-'.,]+$/.test(value);
+            }, "Author name can only contain letters, spaces, hyphens, apostrophes, and periods.");
+
+            // Configure validation
+            $("#createBookForm").validate({
+                rules: {
+                    Title: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 200,
+                        booktitle: true
+                    },
+                    Author: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 100,
+                        authorname: true
+                    },
+                    CategoryId: {
+                        required: true
+                    },
+                    Price: {
+                        required: true,
+                        min: 1,
+                        max: 1000,
+                        number: true
+                    },
+                    Description: {
+                        maxlength: 1000
+                    }
+                },
+                messages: {
+                    Title: {
+                        required: "Book title is required.",
+                        minlength: "Book title must be at least 2 characters long.",
+                        maxlength: "Book title cannot exceed 200 characters.",
+                        booktitle: "Book title can only contain letters, numbers, spaces, and common punctuation marks."
+                    },
+                    Author: {
+                        required: "Author name is required.",
+                        minlength: "Author name must be at least 2 characters long.",
+                        maxlength: "Author name cannot exceed 100 characters.",
+                        authorname: "Author name can only contain letters, spaces, hyphens, apostrophes, and periods."
+                    },
+                    CategoryId: {
+                        required: "Please select a category."
+                    },
+                    Price: {
+                        required: "Price is required.",
+                        min: "Price must be at least $1.00.",
+                        max: "Price cannot exceed $1,000.00.",
+                        number: "Price must be a valid number."
+                    },
+                    Description: {
+                        maxlength: "Description cannot exceed 1000 characters."
+                    }
+                },
+                errorClass: "text-danger",
+                validClass: "is-valid",
+                errorElement: "span",
+                highlight: function(element) {
+                    $(element).addClass("is-invalid").removeClass("is-valid");
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass("is-invalid").addClass("is-valid");
+                },
+                submitHandler: function(form) {
+                    // Show loading state
+                    $("#submitBtn").prop("disabled", true);
+                    $("#loadingSpinner").removeClass("d-none");
+
+                    // Submit the form
+                    form.submit();
+                }
+            });
+
+            // Real-time validation feedback
+            $("#Title").on("input", function() {
+                var value = $(this).val().trim();
+                if (value.length > 0) {
+                    $(this).valid(); // Trigger validation
+                }
+            });
+
+            $("#Author").on("input", function() {
+                var value = $(this).val().trim();
+                if (value.length > 0) {
+                    $(this).valid(); // Trigger validation
+                }
+            });
+
+            $("#CategoryId").on("change", function() {
+                $(this).valid(); // Trigger validation
+            });
+
+            $("#Price").on("input", function() {
+                var value = $(this).val();
+                if (value.length > 0) {
+                    $(this).valid(); // Trigger validation
+                }
+            });
+
+            $("#Description").on("input", function() {
+                var value = $(this).val().trim();
+                if (value.length > 0) {
+                    $(this).valid(); // Trigger validation
+                }
+            });
+
+            // Trim whitespace on blur
+            $("#Title, #Author, #Description").on("blur", function() {
+                $(this).val($(this).val().trim());
+            });
+
+            // Format price input
+            $("#Price").on("blur", function() {
+                var value = parseFloat($(this).val());
+                if (!isNaN(value)) {
+                    $(this).val(value.toFixed(2));
+                }
+            });
+        });
+    </script>
+} 

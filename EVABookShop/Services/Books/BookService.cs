@@ -1,6 +1,8 @@
-﻿using EVABookShop.Models;
+﻿using Models;
 using EVABookShop.UnitOfWork;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Threading.Tasks;
+using EVABookShop.Models;
 
 namespace EVABookShop.Services.Books
 {
@@ -13,9 +15,9 @@ namespace EVABookShop.Services.Books
             _unitOfWork = unitOfWork;
         }
 
-        public List<BookViewModel> GetAllBooks()
+        public async Task<List<BookViewModel>> GetAllBooks()
         {
-            var books = _unitOfWork.Repository<Book>().GetAll().Result;
+            var books = await _unitOfWork.Repository<Book>().GetAll(new List<string> { "Category" });
             return books.Select(b => new BookViewModel
             {
                 Id = b.Id,
@@ -30,10 +32,10 @@ namespace EVABookShop.Services.Books
 
         public async Task<BookViewModel> GetBookById(int id)
         {
-            var book = await Task.Run(() => _unitOfWork.Repository<Book>().GetById(id));
+            var book = _unitOfWork.Repository<Book>().GetById(id, new List<string> { "Category" });
             if (book == null) return null;
 
-            return new BookViewModel
+            return await Task.FromResult(new BookViewModel
             {
                 Id = book.Id,
                 Title = book.Title,
@@ -42,7 +44,7 @@ namespace EVABookShop.Services.Books
                 Price = book.Price,
                 CategoryId = book.CategoryId,
                 CategoryName = book.Category?.CatName ?? ""
-            };
+            });
         }
 
         public async Task<bool> CreateBook(BookViewModel model, ModelStateDictionary modelState)
@@ -61,7 +63,7 @@ namespace EVABookShop.Services.Books
             };
             repo.Add(book);
             await _unitOfWork.SaveChanges();
-            return true;
+            return await Task.FromResult(true);
         }
 
         public async Task<bool> UpdateBook(int id, BookViewModel model, ModelStateDictionary modelState)
@@ -70,7 +72,7 @@ namespace EVABookShop.Services.Books
                 return false;
 
             var repo = _unitOfWork.Repository<Book>();
-            var book = await Task.Run(() => repo.GetById(id));
+            var book = repo.GetById(id);
             if (book == null)
                 return false;
 
@@ -82,7 +84,7 @@ namespace EVABookShop.Services.Books
 
             await repo.Update(book);
             await _unitOfWork.SaveChanges();
-            return true;
+            return await Task.FromResult(true);
         }
 
         public async Task<bool> DeleteBook(int id)
@@ -93,7 +95,7 @@ namespace EVABookShop.Services.Books
 
             repo.Delete(book.Id);
             await _unitOfWork.SaveChanges();
-            return true;
+            return await Task.FromResult(true);
         }
     }
 }
